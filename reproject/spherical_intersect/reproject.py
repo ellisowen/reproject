@@ -113,12 +113,10 @@ def reproject_celestial(array, wcs_in, wcs_out, shape_out):
 
                     # Figure out the fraction of the input pixel that makes it
                     # to the output pixel at this position.
-
-                    overlap, _ = _compute_overlap(ilon, ilat, olon, olat)
-                    original, _ = _compute_overlap(ilon, ilat, ilon, ilat)
+                    _, overlap = _compute_overlap(ilon, ilat, olon, olat)
+                    _, original = _compute_overlap(ilon, ilat, ilon, ilat)
                     array_new[jj, ii] += array[j, i] * overlap / original
                     weights[jj, ii] += overlap / original
-
     array_new /= weights
 
-    return array_new
+    return np.nan_to_num(array_new)
