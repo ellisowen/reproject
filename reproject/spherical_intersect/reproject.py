@@ -81,55 +81,47 @@ def reproject_celestial(array, wcs_in, wcs_out, shape_out):
     array_new = np.zeros(shape_out)
     weights = np.zeros(shape_out)
     print(nx_in, ny_in)
-    for i in range(nx_in):
-        j = np.arange(ny_in)
+    i = np.arange(nx_in)
+    j = np.arange(ny_in)
 
-        # For every input pixel we find the position in the output image in
-        # pixel coordinates, then use the full range of overlapping output
-        # pixels with the exact overlap function.
-        xmin_a = np.minimum(xp_inout[j[:-1]+1, i], xp_inout[j[1:], i+1])
-        xmin_b = np.minimum(xp_inout[j[:-1]+1, i+1], xp_inout[j[:-1]+1, i])
-        xmin = np.array(np.minimum(xmin_a, xmin_b), dtype=int)
-        xmax_a = np.maximum(xp_inout[j[1:], i], xp_inout[j[1:], i+1])
-        xmax_b = np.maximum(xp_inout[j[:-1]+1, i+1], xp_inout[j[:-1]+1, i])
-        xmax = np.array(np.maximum(xmax_a, xmax_b), dtype=int)
-        ymin_a = np.minimum(yp_inout[j[1:], i], yp_inout[j[1:], i+1])
-        ymin_b = np.minimum(yp_inout[j[:-1]+1, i+1], yp_inout[j[:-1]+1, i])
-        ymin = np.array(np.minimum(ymin_a, ymin_b), dtype=int)
-        ymax_a = np.maximum(yp_inout[j[1:], i], yp_inout[j[1:], i+1])
-        ymax_b = np.maximum(yp_inout[j[:-1]+1, i+1], yp_inout[j[:-1]+1, i])
-        ymax = np.array(np.maximum(ymax_a, ymax_b), dtype=int)
+    # For every input pixel we find the position in the output image in
+    # pixel coordinates, then use the full range of overlapping output
+    # pixels with the exact overlap function.
+    
+    xmin_a = np.nan_to_num(np.minimum(xp_inout[:-1, 1:], xp_inout[:-1, 1:]))
+    xmin_b = np.nan_to_num(np.minimum(xp_inout[1:, 1:], xp_inout[1:, :-1]))
+    xmin = np.array(np.minimum(xmin_a, xmin_b), dtype=int)
+    xmax_a = np.nan_to_num(np.maximum(xp_inout[:-1, 1:], xp_inout[:-1, 1:]))
+    xmax_b = np.nan_to_num(np.maximum(xp_inout[1:, 1:], xp_inout[1:, :-1]))
+    xmax = np.array(np.maximum(xmax_a, xmax_b), dtype=int)
+    ymin_a = np.nan_to_num(np.minimum(yp_inout[:-1, 1:], yp_inout[:-1, 1:]))
+    ymin_b = np.nan_to_num(np.minimum(yp_inout[1:, 1:], yp_inout[1:, :-1]))
+    ymin = np.array(np.minimum(ymin_a, ymin_b), dtype=int)
+    ymax_a = np.nan_to_num(np.maximum(yp_inout[:-1, 1:], yp_inout[:-1, 1:]))
+    ymax_b = np.nan_to_num(np.maximum(yp_inout[1:, 1:], yp_inout[1:, :-1]))
+    ymax = np.array(np.maximum(ymax_a, ymax_b), dtype=int)
+    
+    ilon = [[xw_in[:-1, 1:], xw_in[:-1, 1:], xw_in[1:, 1:], xw_in[1:, :-1]][::-1]]
+    ilat = [[yw_in[:-1, 1:], yw_in[:-1, 1:], yw_in[1:, 1:], yw_in[1:, :-1]][::-1]]
+    ilon = np.radians(np.array(ilon))
+    ilat = np.radians(np.array(ilat))
+ 
+    olon = [[xw_out[:-1, 1:], xw_out[:-1, 1:], xw_out[1:, 1:], xw_out[1:, :-1]][::-1]]
+    olat = [[yw_out[:-1, 1:], yw_out[:-1, 1:], yw_out[1:, 1:], yw_out[1:, :-1]][::-1]]
+    olon = np.radians(np.array(olon))
+    olat = np.radians(np.array(olat))
 
-        ilon = [[xw_in[j[1:], i][0], xw_in[j[1:], i+1][0], xw_in[j[:-1]+1, i+1][0], xw_in[j[:-1]+1, i][0]][::-1]]
-        ilat = [[yw_in[j[1:], i][0], yw_in[j[1:], i+1][0], yw_in[j[:-1]+1, i+1][0], yw_in[j[:-1]+1, i][0]][::-1]]
-        # possible bug here with ilat
-        ilon = np.radians(np.array(ilon))
-        ilat = np.radians(np.array(ilat))
-
-        xmin_array = np.maximum(np.zeros_like(xmin), xmin)
-        xmax_array = np.minimum(np.ones_like(xmax) * (nx_out-1), xmax)
-        ymin_array = np.maximum(np.zeros_like(ymin), ymin)
-        ymax_array = np.minimum(np.ones_like(ymax) * (ny_out-1), ymax)
-        indices = np.arange(len(xmin))
-        for index in indices:
-            xmin = xmin_array[index]
-            xmax = xmax_array[index]
-            ymin = ymin_array[index]
-            ymax = ymax_array[index]
-            for ii in range(xmin, xmax+1):
-                for jj in range(ymin, ymax+1): 
-                    olon = [[xw_out[jj, ii], xw_out[jj, ii+1], xw_out[jj+1, ii+1], xw_out[jj+1, ii]][::-1]]
-                    olat = [[yw_out[jj, ii], yw_out[jj, ii+1], yw_out[jj+1, ii+1], yw_out[jj+1, ii]][::-1]]
-                    olon = np.radians(np.array(olon))
-                    olat = np.radians(np.array(olat))
-
-                    # Figure out the fraction of the input pixel that makes it
-                    # to the output pixel at this position.
-                    import IPython; IPython.embed()
-                    _, overlap = _compute_overlap(ilon, ilat, olon, olat)
-                    _, original = _compute_overlap(ilon, ilat, ilon, ilat)
-                    array_new[jj, ii] += array[j, i] * overlap / original
-                    weights[jj, ii] += overlap / original
+    
+    # Figure out the fraction of the input pixel that makes it
+    # to the output pixel at this position.
+    
+    
+    import IPython; IPython.embed()
+    # Loop over here - how does my input compare to the original? Check by switching branch
+    overlap, _ = _compute_overlap(ilon[:][0][0][0], ilat[:][0][0][0], olon[:][0][0][0], olat[:][0][0][0])
+    original, _ = _compute_overlap(ilon, ilat, ilon, ilat)
+    array_new += array * overlap / original
+    weights += overlap / original
     array_new /= weights
 
     return np.nan_to_num(array_new)
