@@ -80,18 +80,18 @@ def reproject_celestial(array, wcs_in, wcs_out, shape_out):
 
     array_new = np.zeros(shape_out)
     weights = np.zeros(shape_out)
-
+    print(nx_in, ny_in)
     for i in range(nx_in):
+        print(i)
         for j in range(ny_in):
-
+            import IPython; IPython.embed()
             # For every input pixel we find the position in the output image in
             # pixel coordinates, then use the full range of overlapping output
             # pixels with the exact overlap function.
-
-            xmin = int(min(xp_inout[j, i], xp_inout[j, i+1], xp_inout[j+1, i+1], xp_inout[j+1, i]))
-            xmax = int(max(xp_inout[j, i], xp_inout[j, i+1], xp_inout[j+1, i+1], xp_inout[j+1, i]))
-            ymin = int(min(yp_inout[j, i], yp_inout[j, i+1], yp_inout[j+1, i+1], yp_inout[j+1, i]))
-            ymax = int(max(yp_inout[j, i], yp_inout[j, i+1], yp_inout[j+1, i+1], yp_inout[j+1, i]))
+            xmin = int(np.nan_to_num((min(xp_inout[j, i], xp_inout[j, i+1], xp_inout[j+1, i+1], xp_inout[j+1, i]))))
+            xmax = int(np.nan_to_num((max(xp_inout[j, i], xp_inout[j, i+1], xp_inout[j+1, i+1], xp_inout[j+1, i]))))
+            ymin = int(np.nan_to_num((min(yp_inout[j, i], yp_inout[j, i+1], yp_inout[j+1, i+1], yp_inout[j+1, i]))))
+            ymax = int(np.nan_to_num((max(yp_inout[j, i], yp_inout[j, i+1], yp_inout[j+1, i+1], yp_inout[j+1, i]))))
 
             ilon = [[xw_in[j, i], xw_in[j, i+1], xw_in[j+1, i+1], xw_in[j+1, i]][::-1]]
             ilat = [[yw_in[j, i], yw_in[j, i+1], yw_in[j+1, i+1], yw_in[j+1, i]][::-1]]
